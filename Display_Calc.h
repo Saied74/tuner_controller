@@ -21,13 +21,16 @@ struct gamma {
   double capacitor;
 };
 
+int inductorBank[8] = {3200, 1600, 800, 400, 200, 100, 50, 25}; //in nH
+int capacitorBank[8] = {1370, 680, 340, 170, 86, 43, 22, 12}; //in pF
+
 
 void calcStart(struct gamma *g){
   double real0 = g->magnitude0 * cos(g->phase0);
   double imag0 = g->magnitude0 * sin(g->phase0);
   double gSquared = g->magnitude0 * g-> magnitude0;
-  double den = 1.0 + gSquared - 2* real0;
-  g->r0 = gSquared / den;
+  double den = 1.0 + gSquared - 2 * real0;
+  g->r0 = (1.0 - gSquared) / den;
   g->x0 = (2.0 * imag0)/den;
   g->z0Squared = g->r0 * g->r0 + g->x0 * g->x0;
   g->g0 = g->r0/g->z0Squared;
@@ -59,7 +62,7 @@ void calcEnd(struct gamma *g){
     imag1 = -sqrt(real1 - real1 * real1);
     double gSquared = real1 * real1 + imag1 * imag1;
     double den = 1.0 + gSquared - 2* real1;
-    g->r1 = gSquared / den;
+    g->r1 = (1 - gSquared) / den;
     g->x1 = (2.0 * imag1)/den;
     g->z1Squared = g->r1 * g->r1 + g->x1 * g->x1;
     g->g1 = g->r1/g->z1Squared;
@@ -69,9 +72,9 @@ void calcEnd(struct gamma *g){
   real1 = (g->r0-1)/(3 * g->r0 + 1);
   imag1 = sqrt(-real1 - real1 * real1);
   double gSquared = real1 * real1 + imag1 * imag1;
-  double den = 1.0 + gSquared - 2* real0;
-  g->r1 = gSquared / den;
-  g->x1 = (2.0 * imag0)/den;
+  double den = 1.0 + gSquared - 2 * real1;
+  g->r1 = (1.0 - gSquared) / den;
+  g->x1 = (2.0 * imag1)/den;
   g->z1Squared = g->r1 * g->r1 + g->x1 * g->x1;
   g->g1 = g->r1/g->z1Squared;
   g->b1 = -g->x1/g->z1Squared;
@@ -81,18 +84,30 @@ void calcLC(struct gamma *g) {
   switch (g->region) {
     case 1:
     g->capacitor = (g->b1 - g->b0)/(100.0 * PI * g->frequency);
-    g->inductor = (50.0 * g->x1)/(2.0 * PI * g->frequency);
-    break;
-    case 2:
-    g->inductor = (50.0 * g->x1)/(2.0 * PI * g->frequency);
+    g->inductor = -(50.0 * g->x1)/(2.0 * PI * g->frequency);
     break;
     case 3:
-    g->capacitor = (g->b0)/(100.0 * PI * g->frequency);
+    g->inductor = -(50.0 * g->x1)/(2.0 * PI * g->frequency);
     break;
     case 4:
-    g->capacitor = (g->b0)/(100.0 * PI * g->frequency);
+    g->capacitor = -(g->b1)/(100.0 * PI * g->frequency);
+    break;
+    case 2:
+    g->capacitor = -(g->b1)/(100.0 * PI * g->frequency);
     g->inductor = (50.0 * (g->x1 - g->x0))/(2.0 * PI * g->frequency);
     break;
   }
+}
 
+char calcRelays(double x, int bank[8]){
+  char n = 0;
+  for (int i = 0; i < 8; i++) {
+        if (x >= bank[i]){
+            x = x -bank[i];
+            n = (n << 1) | 1;
+        } else {
+            n = n << 1;
+        }
+    }
+  return n;
 }

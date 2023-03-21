@@ -27,7 +27,7 @@
 #define LCD_RESET A4 // Can alternately just connect to Arduino's reset pin
 
 //touch screen pressure settings
-#define MINPRESSURE 250
+#define MINPRESSURE 200
 #define MAXPRESSURE 1000
 
 //text sizes
@@ -168,10 +168,10 @@ void setupBaseScreen(Adafruit_TFTLCD tft){
   tft.print("AD2CC 500 Watt HF Tuner");
 }
 
-void makeButton(Adafruit_TFTLCD tft, button *b){
+void makeButton(Adafruit_TFTLCD tft, button *b, int color){
   tft.setTextSize(TITLETEXT);
   tft.setTextColor(BLACK);
-  tft.fillRect(b->x0, b->y0, b->w, b->h, WHITE);
+  tft.fillRect(b->x0, b->y0, b->w, b->h, color);
   tft.setCursor(b->labelX, b->labelY);
   tft.print(b->label);
 }
