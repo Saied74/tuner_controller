@@ -66,6 +66,7 @@ scale pwr = { 0, PWRDOWN, "PWR", PWRLEFT, PWRDOWN + PWRHEIGHT + SCALEOFFSET, PWR
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(19200);
+  Serial1.begin(9600);
   tft.reset();
   uint16_t identifier = tft.readID();
 
@@ -101,6 +102,11 @@ void setup() {
 }
 
 void loop() {
+  //Serial.print(".");
+  //String s = Serial1.readStringUntil('\n');
+  //Serial.println(s);
+
+  Serial1.println("how are you old man?");
 
   //state machine
   switch (state) {
